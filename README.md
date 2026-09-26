@@ -18,6 +18,24 @@ The proposed system uses two microphones and parallel signal-processing paths.
 - **High-frequency path:** Uses AI-based speech enhancement for non-stationary and impulsive components.
 - **Output:** The processed sub-bands are recombined to produce enhanced speech for communication.
 
+
+### Dual-Microphone Approach
+
+Two microphones are used to provide different signal information.
+
+The primary microphone captures the desired speech together with environmental noise, while the reference microphone is positioned to capture environmental noise with minimal speech leakage.
+
+The reference signal provides the adaptive filter with information about the noise component that is correlated with the primary microphone noise.
+
+
+### Hybrid Processing Approach
+
+A hybrid architecture is used because different noise conditions may require different processing strategies.
+
+The reference-assisted NLMS path uses the second microphone to estimate and suppress correlated noise, while the AI path is intended to enhance speech under more complex, non-stationary, and impulsive noise conditions.
+
+The processed sub-bands are subsequently recombined to produce the final enhanced speech signal.
+
 ## System Architecture
 
 ```text
@@ -51,8 +69,7 @@ Cancellation
 
 
 
-
-   ## Current Prototype
+##Current Prototype
 
 The current software prototype is being developed in Python using recorded speech and environmental noise.
 
@@ -64,6 +81,8 @@ The current software prototype is being developed in Python using recorded speec
 - Noise scaling to a target input SNR
 - Generation of primary and reference microphone signals
 
+
+
 ### Stage 2 – Sub-Band Filtering
 
 The signal is divided into the required frequency regions:
@@ -72,6 +91,36 @@ The signal is divided into the required frequency regions:
 - Low band: **80 Hz – 1.5 kHz**
 - High band: **1.5 kHz – 8 kHz**
 - Sampling rate: **24 kHz**
+
+
+
+### Sampling Rate Selection
+
+A sampling rate of **24 kHz** was selected because the system processes speech up to **8 kHz**.
+
+At 24 kHz, the Nyquist frequency is **12 kHz**, providing a 4 kHz transition region above the 8 kHz signal bandwidth for practical anti-aliasing filtering.
+
+Using a 16 kHz sampling rate would place the 8 kHz upper limit directly at the Nyquist frequency, leaving no practical transition band.
+
+
+### Sub-Band Crossover Selection
+
+The **1.5 kHz crossover** was selected as an engineering design choice to divide the signal into two processing regions.
+
+- **80 Hz–1.5 kHz:** Processed using reference-assisted NLMS adaptive filtering.
+- **1.5–8 kHz:** Processed using AI-based speech enhancement.
+
+This allows the two processing methods to operate on frequency regions where their respective processing characteristics can be evaluated separately.
+
+
+### Dual-Microphone Approach
+
+Two microphones are used to provide different signal information.
+
+The primary microphone captures the desired speech together with environmental noise, while the reference microphone is positioned to capture environmental noise with minimal speech leakage.
+
+The reference signal provides the adaptive filter with information about the noise component that is correlated with the primary microphone noise.
+
 
 
 
@@ -227,7 +276,7 @@ The final system is intended to operate as a real-time embedded speech-processin
 
 The planned hardware architecture includes:
 
-```text
+
 Microphone 1 ──┐
                ├──► Audio Acquisition ──► Embedded Processor
 Microphone 2 ──┘                              │
